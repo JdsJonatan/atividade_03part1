@@ -15,13 +15,11 @@ class _HomePageState extends State<HomePage> {
   ContactHelper helper = ContactHelper();
 
   List<Contact> _contacts = List();
-  List<Contact> _contactsFilter = List();
 
   void _getAllContacts(){
     helper.getAllContacts().then((list){
       setState(() {
         _contacts = list;
-        _contactsFilter = _contacts;
       });
     });
   }
@@ -34,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _contactCard(BuildContext context, int index){
-    var contact = _contactsFilter[index];
+    var contact = _contacts[index];
 
     return GestureDetector(
       child: Card(
@@ -159,7 +157,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(10.0),
-        itemCount: _contactsFilter.length+1,
+        itemCount: _contacts.length+1,
         itemBuilder: (context, index){
           return index == 0 ? _barraPesquisa() : _contactCard(context, index-1);
         }
@@ -176,12 +174,15 @@ class _HomePageState extends State<HomePage> {
         ),
         onChanged: (text){
           text = text.toLowerCase();
-          setState(() {
-            _contactsFilter = _contacts.where((contato){
-              var nomeContato = contato.name.toLowerCase();
-              return nomeContato.contains(text);
-            }).toList();
-          });
+          if(text.isEmpty){
+            _getAllContacts();
+          }else{
+            helper.searchContact(text).then((list){
+              setState(() {
+                _contacts = list;
+              });
+            });
+          }
         },
       ),
     );
